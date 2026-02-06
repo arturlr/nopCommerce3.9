@@ -394,6 +394,7 @@ namespace Nop.Services.Catalog
         /// <returns>Category</returns>
         public virtual Category GetCategoryById(int categoryId)
         {
+            // NOTE: This method is being migrated to .NET 8 API. See HttpCatalogAdapter.
             if (categoryId == 0)
                 return null;
             
@@ -473,6 +474,7 @@ namespace Nop.Services.Catalog
 
         /// <summary>
         /// Gets product category mapping collection
+        /// NOTE: This method is being migrated to .NET 8 API. See HttpCatalogAdapter.GetCategoryProducts.
         /// </summary>
         /// <param name="categoryId">Category identifier</param>
         /// <param name="pageIndex">Page index</param>

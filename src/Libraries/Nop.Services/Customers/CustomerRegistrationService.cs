@@ -171,6 +171,10 @@ namespace Nop.Services.Customers
         /// </summary>
         /// <param name="request">Request</param>
         /// <returns>Result</returns>
+        /// <remarks>
+        /// MIGRATION NOTE: This method is being migrated to .NET 8 API.
+        /// New registrations may be handled by HttpCustomerAdapter when USE_DOTNET8_API=true.
+        /// </remarks>
         public virtual CustomerRegistrationResult RegisterCustomer(CustomerRegistrationRequest request)
         {
             if (request == null)
