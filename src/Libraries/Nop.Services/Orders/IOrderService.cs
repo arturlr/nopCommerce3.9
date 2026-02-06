@@ -90,6 +90,13 @@ namespace Nop.Services.Orders
         void UpdateOrder(Order order);
 
         /// <summary>
+        /// Cancels an order
+        /// </summary>
+        /// <param name="orderId">Order identifier</param>
+        /// <returns>True if cancelled successfully</returns>
+        bool CancelOrder(int orderId);
+
+        /// <summary>
         /// Get an order by authorization transaction ID and payment method system name
         /// </summary>
         /// <param name="authorizationTransactionId">Authorization transaction ID</param>

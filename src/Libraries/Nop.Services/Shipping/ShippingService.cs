@@ -235,6 +235,10 @@ namespace Nop.Services.Shipping
         /// </summary>
         /// <param name="filterByCountryId">The country indentifier to filter by</param>
         /// <returns>Shipping methods</returns>
+        /// <remarks>
+        /// MIGRATION NOTE: This method is being migrated to .NET 8 API. 
+        /// New implementations should use the HttpShippingAdapter which delegates to the .NET 8 shipping endpoints.
+        /// </remarks>
         public virtual IList<ShippingMethod> GetAllShippingMethods(int? filterByCountryId = null)
         {
             if (filterByCountryId.HasValue && filterByCountryId.Value > 0)
@@ -798,6 +802,10 @@ namespace Nop.Services.Shipping
         /// <param name="allowedShippingRateComputationMethodSystemName">Filter by shipping rate computation method identifier; null to load shipping options of all shipping rate computation methods</param>
         /// <param name="storeId">Load records allowed only in a specified store; pass 0 to load all records</param>
         /// <returns>Shipping options</returns>
+        /// <remarks>
+        /// MIGRATION NOTE: This method is being migrated to .NET 8 API. 
+        /// New implementations should use the HttpShippingAdapter which delegates to the .NET 8 shipping rate calculation endpoints.
+        /// </remarks>
         public virtual GetShippingOptionResponse GetShippingOptions(IList<ShoppingCartItem> cart,
             Address shippingAddress, Customer customer = null, string allowedShippingRateComputationMethodSystemName = "", 
             int storeId = 0)
