@@ -4,7 +4,11 @@ using Nop.Core.Configuration;
 using Nop.Core.Infrastructure;
 using Nop.Core.Infrastructure.DependencyManagement;
 using Nop.Services.Catalog;
+using Nop.Services.Cms;
 using Nop.Services.Customers;
+using Nop.Services.Orders;
+using Nop.Services.Payments;
+using Nop.Services.Shipping;
 
 namespace Nop.Services.Infrastructure
 {
@@ -28,6 +32,16 @@ namespace Nop.Services.Infrastructure
                 builder.RegisterDecorator<HttpCatalogAdapter, ICategoryService>();
                 builder.RegisterDecorator<HttpCustomerAdapter, ICustomerRegistrationService>();
                 builder.RegisterDecorator<HttpCustomerProfileAdapter, ICustomerService>();
+                builder.RegisterDecorator<HttpShoppingCartAdapter, IShoppingCartService>();
+                builder.RegisterDecorator<HttpPaymentAdapter, IPaymentService>();
+                builder.RegisterDecorator<HttpShippingAdapter, IShippingService>();
+                builder.RegisterDecorator<HttpWidgetAdapter, IWidgetService>();
+                
+                // Register HttpOrderAdapter for order management
+                builder.RegisterType<HttpOrderAdapter>().AsSelf().InstancePerLifetimeScope();
+                
+                // Register HttpAdminOrderAdapter for admin order management
+                builder.RegisterType<HttpAdminOrderAdapter>().AsSelf().InstancePerLifetimeScope();
             }
         }
 

@@ -1062,6 +1062,7 @@ namespace Nop.Services.Orders
         /// <param name="quantity">Quantity</param>
         /// <param name="automaticallyAddRequiredProductsIfEnabled">Automatically add required products if enabled</param>
         /// <returns>Warnings</returns>
+        /// <remarks>MIGRATION: This method is being migrated to .NET 8 API. Use HttpShoppingCartAdapter for new functionality.</remarks>
         public virtual IList<string> AddToCart(Customer customer, Product product,
             ShoppingCartType shoppingCartType, int storeId, string attributesXml = null,
             decimal customerEnteredPrice = decimal.Zero,

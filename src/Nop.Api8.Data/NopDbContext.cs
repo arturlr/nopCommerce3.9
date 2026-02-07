@@ -18,6 +18,10 @@ public class NopDbContext : DbContext
     public DbSet<ProductReview> ProductReviews { get; set; }
     public DbSet<Customer> Customers { get; set; }
     public DbSet<GenericAttribute> GenericAttributes { get; set; }
+    public DbSet<ShoppingCartItem> ShoppingCartItems { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItem> OrderItems { get; set; }
+    public DbSet<ShippingMethod> ShippingMethods { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -75,6 +79,28 @@ public class NopDbContext : DbContext
             .WithMany(c => c.GenericAttributes)
             .HasForeignKey(ga => ga.EntityId)
             .HasPrincipalKey(c => c.Id);
+
+        // ShoppingCartItem relationships
+        modelBuilder.Entity<ShoppingCartItem>()
+            .HasOne(sci => sci.Customer)
+            .WithMany()
+            .HasForeignKey(sci => sci.CustomerId);
+
+        modelBuilder.Entity<ShoppingCartItem>()
+            .HasOne(sci => sci.Product)
+            .WithMany()
+            .HasForeignKey(sci => sci.ProductId);
+
+        // Order-OrderItem relationship
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(oi => oi.Order)
+            .WithMany(o => o.OrderItems)
+            .HasForeignKey(oi => oi.OrderId);
+
+        modelBuilder.Entity<OrderItem>()
+            .HasOne(oi => oi.Product)
+            .WithMany()
+            .HasForeignKey(oi => oi.ProductId);
 
         // Table mappings for existing nopCommerce schema
         modelBuilder.Entity<ProductPicture>().ToTable("Product_Picture_Mapping");
