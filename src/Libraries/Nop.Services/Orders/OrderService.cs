@@ -24,6 +24,7 @@ namespace Nop.Services.Orders
         private readonly IRepository<RecurringPayment> _recurringPaymentRepository;
         private readonly IRepository<Customer> _customerRepository;
         private readonly IEventPublisher _eventPublisher;
+        private readonly HttpOrderAdapter _httpOrderAdapter;
 
         #endregion
 
@@ -39,15 +40,24 @@ namespace Nop.Services.Orders
         /// <param name="recurringPaymentRepository">Recurring payment repository</param>
         /// <param name="customerRepository">Customer repository</param>
         /// <param name="eventPublisher">Event published</param>
+        /// <param name="httpOrderAdapter">HTTP order adapter</param>
         public OrderService(IRepository<Order> orderRepository,
             IRepository<OrderItem> orderItemRepository,
             IRepository<OrderNote> orderNoteRepository,
             IRepository<Product> productRepository,
             IRepository<RecurringPayment> recurringPaymentRepository,
             IRepository<Customer> customerRepository, 
-            IEventPublisher eventPublisher)
+            IEventPublisher eventPublisher,
+            HttpOrderAdapter httpOrderAdapter = null)
         {
             this._orderRepository = orderRepository;
+            this._orderItemRepository = orderItemRepository;
+            this._orderNoteRepository = orderNoteRepository;
+            this._productRepository = productRepository;
+            this._recurringPaymentRepository = recurringPaymentRepository;
+            this._customerRepository = customerRepository;
+            this._eventPublisher = eventPublisher;
+            this._httpOrderAdapter = httpOrderAdapter;
             this._orderItemRepository = orderItemRepository;
             this._orderNoteRepository = orderNoteRepository;
             this._productRepository = productRepository;
@@ -72,6 +82,22 @@ namespace Nop.Services.Orders
             if (orderId == 0)
                 return null;
 
+            // Try .NET 8 API first if adapter is available
+            if (_httpOrderAdapter != null)
+            {
+                try
+                {
+                    var orderFromApi = _httpOrderAdapter.GetOrderByIdAsync(orderId).Result;
+                    if (orderFromApi != null)
+                        return orderFromApi;
+                }
+                catch
+                {
+                    // Fall through to legacy implementation
+                }
+            }
+
+            // Fallback to legacy implementation
             return _orderRepository.GetById(orderId);
         }
 
@@ -177,6 +203,30 @@ namespace Nop.Services.Orders
             string billingEmail = null, string billingLastName = "",
             string orderNotes = null, int pageIndex = 0, int pageSize = int.MaxValue)
         {
+            // Try .NET 8 API for simple customer order searches
+            if (_httpOrderAdapter != null && customerId > 0 && storeId == 0 && vendorId == 0 && 
+                productId == 0 && affiliateId == 0 && warehouseId == 0 && billingCountryId == 0 &&
+                string.IsNullOrEmpty(paymentMethodSystemName) && !createdFromUtc.HasValue && 
+                !createdToUtc.HasValue && (osIds == null || !osIds.Any()) && 
+                (psIds == null || !psIds.Any()) && (ssIds == null || !ssIds.Any()) &&
+                string.IsNullOrEmpty(billingEmail) && string.IsNullOrEmpty(billingLastName) &&
+                string.IsNullOrEmpty(orderNotes))
+            {
+                try
+                {
+                    var ordersFromApi = _httpOrderAdapter.GetCustomerOrdersAsync(customerId, pageIndex, pageSize).Result;
+                    if (ordersFromApi != null && ordersFromApi.Any())
+                    {
+                        return new PagedList<Order>(ordersFromApi, pageIndex, pageSize, ordersFromApi.Count);
+                    }
+                }
+                catch
+                {
+                    // Fall through to legacy implementation
+                }
+            }
+
+            // Legacy implementation
             var query = _orderRepository.Table;
             if (storeId > 0)
                 query = query.Where(o => o.StoreId == storeId);
@@ -270,6 +320,40 @@ namespace Nop.Services.Orders
 
             //event notification
             _eventPublisher.EntityUpdated(order);
+        }
+
+        /// <summary>
+        /// Cancels an order
+        /// </summary>
+        /// <param name="orderId">Order identifier</param>
+        /// <returns>True if cancelled successfully</returns>
+        public virtual bool CancelOrder(int orderId)
+        {
+            // Try .NET 8 API first if adapter is available
+            if (_httpOrderAdapter != null)
+            {
+                try
+                {
+                    var result = _httpOrderAdapter.CancelOrderAsync(orderId).Result;
+                    if (result)
+                        return true;
+                }
+                catch
+                {
+                    // Fall through to legacy implementation
+                }
+            }
+
+            // Legacy implementation - basic status update
+            var order = GetOrderById(orderId);
+            if (order != null && order.OrderStatusId == 10) // 10 = Pending
+            {
+                order.OrderStatusId = 40; // 40 = Cancelled
+                UpdateOrder(order);
+                return true;
+            }
+
+            return false;
         }
 
         /// <summary>
