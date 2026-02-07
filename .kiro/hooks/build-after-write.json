@@ -1,0 +1,14 @@
+{
+  "name": "Build After Code Changes",
+  "version": "1.0.0",
+  "description": "Automatically run dotnet build after any file write during migration to catch compilation errors immediately",
+  "when": {
+    "type": "postToolUse",
+    "toolTypes": ["write"]
+  },
+  "then": {
+    "type": "runCommand",
+    "command": "dotnet build src/NopCommerce.sln",
+    "timeout": 120
+  }
+}

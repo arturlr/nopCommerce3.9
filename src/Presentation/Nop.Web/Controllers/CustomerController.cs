@@ -908,6 +908,9 @@ namespace Nop.Web.Controllers
         [ValidateInput(false)]
         public virtual ActionResult Info(CustomerInfoModel model, FormCollection form)
         {
+            // MIGRATION NOTE: Customer profile updates are being migrated to .NET 8 API
+            // See HttpCustomerProfileAdapter for new implementation
+            
             if (!_workContext.CurrentCustomer.IsRegistered())
                 return new HttpUnauthorizedResult();
 

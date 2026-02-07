@@ -230,6 +230,7 @@ namespace Nop.Services.Catalog
         /// </summary>
         /// <param name="productId">Product identifier</param>
         /// <returns>Product</returns>
+        /// <remarks>MIGRATION: Consider using HttpCatalogAdapter.GetProductDetails for enhanced product information</remarks>
         public virtual Product GetProductById(int productId)
         {
             if (productId == 0)
@@ -403,6 +404,9 @@ namespace Nop.Services.Catalog
         /// false - load only "Unpublished" products
         /// </param>
         /// <returns>Products</returns>
+        /// <remarks>
+        /// MIGRATION NOTE: This method is being migrated to .NET 8 API. Use HttpCatalogAdapter.SearchProducts for new implementations.
+        /// </remarks>
         public virtual IPagedList<Product> SearchProducts(
             int pageIndex = 0,
             int pageSize = int.MaxValue,
